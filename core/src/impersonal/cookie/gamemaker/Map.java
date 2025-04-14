@@ -83,6 +83,11 @@ public class Map {
             sr.line(Mistener.tx,800-Mistener.ty,Mistener.mx,800-Mistener.my);
         }
 
+        if(Mistener.isDown && Graph.mode==Graph.WALLS && Mistener.button==1){
+            sr.setColor(Color.RED);
+            sr.line(Mistener.tx,800-Mistener.ty,Mistener.mx,800-Mistener.my);
+        }
+
         sr.end();
 
 
@@ -126,19 +131,56 @@ public class Map {
     }
 
     public void removeWalls(int x1,int y1, int x2, int y2){
+        ArrayList<int[]> remove = new ArrayList<>();
+        for(int[] wall: walls){
+            if(intersect(wall[0],wall[1],wall[2],wall[3],x1,y1,x2,y2))
+                remove.add(wall);
+        }
+
+        walls.removeAll(remove);
 
     }
 
-    private boolean intersect(float a,float b,float c,float d,float p, float q, float r,float s) {
+    private boolean intersect(float x11,float y11,float x21,float y21,float x12, float y12, float x22,float y22) {
         float det, gamma, lambda;
-        det = (c - a) * (s - q) - (r - p) * (d - b);
+        det = (x21 - x11) * (y22 - y12) - (x22 - x12) * (y21 - y11);
         if (det == 0) {
             return false;
         } else {
-            lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
-            gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+            lambda = ((y22 - y12) * (x22 - x11) + (x12 - x22) * (y22 - y11)) / det;
+            gamma = ((y11 - y21) * (x22 - x11) + (x21 - x11) * (y22 - y11)) / det;
             return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
         }
-    };
+    }
 
+    double dist(double x,double y,double x1, double y1)
+    {
+        return Math.sqrt((x-x1)*(x-x1)+(y-y1)*(y-y1));
+    }
+
+    public int[] getClosestWall(int x, int y) {
+
+        int resx=0,resy=0;
+        int mindist = 2147000000;
+
+        for(int[] wall:walls){
+            int dist = (int)dist(wall[0],wall[1],x,y);
+            if(dist<mindist){
+                mindist=dist;
+                resx = wall[0];
+                resy = wall[1];
+
+            }
+
+            dist = (int)dist(wall[2],wall[3],x,y);
+            if(dist<mindist){
+                mindist=dist;
+                resx = wall[2];
+                resy = wall[3];
+
+            }
+        }
+
+        return new int[]{resx,resy};
+    }
 }

@@ -4,15 +4,41 @@ import com.badlogic.gdx.InputProcessor;
 
 public class Mistener implements InputProcessor {
 
-    public static int tx,ty,mx,my;
+    public static int tx,ty,mx,my,ux,uy;
+
+    public static boolean isShift = false;
+    public static boolean isCtrl = false;
 
     @Override
     public boolean keyDown(int keycode) {
+        switch (keycode){
+            case 59:
+                isShift=true;
+                break;
+            case 129:
+                isCtrl=true;
+                break;
+            case 62:
+                Graph.eyeY=0;
+                Graph.eyeX=0;
+                Graph.zoom=1;
+                break;
+            default:
+                System.out.println(keycode);
+        }
         return false;
     }
 
     @Override
     public boolean keyUp(int keycode) {
+        switch (keycode){
+            case 59:
+                isShift=false;
+                break;
+            case 129:
+                isCtrl=false;
+                break;
+        }
         return false;
     }
 
@@ -58,6 +84,16 @@ public class Mistener implements InputProcessor {
                     }
                 }
             }
+
+
+            if(Graph.mode==Graph.WALLS){
+                if(isCtrl){
+                    int[] close = Graph.map.getClosestWall((int)((tx-Graph.eyeX)/Graph.zoom),(int)((800-ty+Graph.eyeY)/Graph.zoom));
+                    tx = (int)(close[0]*Graph.zoom+Graph.eyeX);
+                    ty = (int)(800-close[1]*Graph.zoom-Graph.eyeY);
+                }
+            }
+
         }
 
         if(button==1){
@@ -71,6 +107,16 @@ public class Mistener implements InputProcessor {
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         isDown=false;
+
+        ux = screenX;
+        uy = screenY;
+
+        if(Graph.mode==Graph.WALLS){
+            if(isShift){
+                if(Math.abs(dx)<Math.abs(dy))ux=tx;else uy=ty;
+            }
+        }
+
         if(button==2) {
             Graph.eyeX += dx;
             Graph.eyeY += dy;
@@ -78,9 +124,16 @@ public class Mistener implements InputProcessor {
 
         if(button==0){
             if(Graph.mode==Graph.WALLS){
-                Graph.map.addWall((int) ((tx-Graph.eyeX)/Graph.zoom),(int)((800-ty+Graph.eyeY)/Graph.zoom),(int)((screenX-Graph.eyeX)/Graph.zoom),(int)((800-screenY+Graph.eyeY)/Graph.zoom));
+                Graph.map.addWall((int) ((tx-Graph.eyeX)/Graph.zoom),(int)((800-ty+Graph.eyeY)/Graph.zoom),(int)((ux-Graph.eyeX)/Graph.zoom),(int)((800-uy+Graph.eyeY)/Graph.zoom));
             }
         }
+
+        if(button==1){
+            if(Graph.mode==Graph.WALLS){
+                Graph.map.removeWalls((int) ((tx-Graph.eyeX)/Graph.zoom),(int)((800-ty+Graph.eyeY)/Graph.zoom),(int)((screenX-Graph.eyeX)/Graph.zoom),(int)((800-screenY+Graph.eyeY)/Graph.zoom));
+            }
+        }
+
 
         dx=0;
         dy=0;
@@ -95,6 +148,12 @@ public class Mistener implements InputProcessor {
 
         mx = screenX;
         my = screenY;
+
+        if(Graph.mode==Graph.WALLS){
+            if(isShift){
+                if(Math.abs(dx)<Math.abs(dy))mx=tx;else my=ty;
+            }
+        }
 
         if(button==0){
             countTileNumber(screenX,screenY);
