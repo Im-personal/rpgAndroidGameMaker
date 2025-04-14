@@ -8,6 +8,7 @@ public class Mistener implements InputProcessor {
 
     public static boolean isShift = false;
     public static boolean isCtrl = false;
+    public static boolean isAlt = false;
 
     @Override
     public boolean keyDown(int keycode) {
@@ -18,7 +19,10 @@ public class Mistener implements InputProcessor {
             case 129:
                 isCtrl=true;
                 break;
-            case 62:
+            case 57:
+                isAlt=true;
+                break;
+            case 62://SPACE
                 Graph.eyeY=0;
                 Graph.eyeX=0;
                 Graph.zoom=1;
@@ -37,6 +41,9 @@ public class Mistener implements InputProcessor {
                 break;
             case 129:
                 isCtrl=false;
+                break;
+            case 57:
+                isAlt=false;
                 break;
         }
         return false;
@@ -87,6 +94,12 @@ public class Mistener implements InputProcessor {
 
 
             if(Graph.mode==Graph.WALLS){
+
+                if(isAlt){
+//                    tx=(Math.round(tx/80f))*80+(Graph.eyeX%80);
+//                    ty=(Math.round(ty/80f))*80-(Graph.eyeY%80);
+                }
+
                 if(isCtrl){
                     int[] close = Graph.map.getClosestWall((int)((tx-Graph.eyeX)/Graph.zoom),(int)((800-ty+Graph.eyeY)/Graph.zoom));
                     tx = (int)(close[0]*Graph.zoom+Graph.eyeX);
@@ -96,7 +109,7 @@ public class Mistener implements InputProcessor {
 
         }
 
-        if(button==1){
+        if(button==1 && Graph.mode==Graph.BUILDING){
             Graph.map.removeTile(selectedTileX,selectedTileY);
         }
         isDown=true;
@@ -172,7 +185,7 @@ public class Mistener implements InputProcessor {
             }
         }
 
-        if(button==1){
+        if(button==1 && Graph.mode==Graph.BUILDING){
             countTileNumber(screenX,screenY);
             Graph.map.removeTile(selectedTileX, selectedTileY);
         }
